@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bootstrap demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">News Junction</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" aria-current="page" href="/?q=all&pageNo=1">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/?q=weather&pageNo=1">Weather</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/?q=sports&pageNo=1">Sports</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/?q=bollywood&pageNo=1">Bollywood</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/?q=business&pageNo=1">Business</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/?q=india&pageNo=1">India</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/?q=technology&pageNo=1">Technology</a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search">
+            <input
+              class="form-control me-2"
+              name="q"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <input
+              class="form-control me-2"
+              name="pageNo"
+              type="hidden"
+              value="1"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success" type="submit">
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container row mx-auto">
+        <div class="d-flex justify-content-center">
+            <h1><span id="queryText"></span> (<span id="queryResult"></span> Results) </h1>
+        </div>
+
+      <div id="content" class="row">
+        <div class="d-flex justify-content-center">
+            <img src="https://samherbert.net/svg-loaders/svg-loaders/oval.svg" style="filter:invert(1)" width="50"  alt="loading...">
+        </div>
+      </div>
+
+      <div class="prevNext my-4 d-flex justify-content-center">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item">
+              <a class="page-link" href="#" id="pre">Previous</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#" id="next">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      console.log("everything's good");
+      let query = window.location.search
+        .split("?")[1]
+        .split("&")[0]
+        .split("=")[1];
+      let page = parseInt(
+        window.location.search.split("?")[1].split("&")[1].split("=")[1]
+      );
+      console.log(query, page);
+
+      let totalPages;
+      let articlesPerPage;
+
+      const fetchNews = async (query, pageNo) => {
+        try {
+          let response = await fetch(
+            `/api?q=${query}&apiKey=e0aa803559034f45ac7faf06dca54005&pageSize=12&page=${page}`
+          );
+          let data = await response.json();
+          console.log(data);
+
+          queryText.innerHTML=query;
+          queryResult.innerHTML=data.totalResults;
+
+          totalPages = Math.ceil(data.totalResults / articlesPerPage);
+
+          pre.href = `/?q=${query}&pageNo=${page - 1}`;
+          next.href = `/?q=${query}&pageNo=${page + 1}`;
+
+          let str = "";
+          for (let item of data.articles) {
+            let date = new Date(item.publishedAt).toLocaleDateString();
+            str =
+              str +
+              `
+                <div class="card mx-2 my-2" style="width: 18rem">
+                    <img src="${item.urlToImage}" class="card-img-top" alt="..." />
+                    <div class="card-body">
+                    <h5 class="card-title">${item.title}</h5>
+                    <span class="fw-bold">Published: ${date}</span>
+                    <p class="card-text">
+                        ${item.description}
+                    </p>
+                    <a target="_blank" href="${item.url}" class="btn btn-primary">Read More...</a>
+                    </div>
+                </div>
+                `;
+          }
+
+          content.innerHTML = str;
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      fetchNews(query, page);
+    </script>
+  </body>
+</html>
