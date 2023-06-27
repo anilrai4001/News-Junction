@@ -10,6 +10,8 @@
       integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
       crossorigin="anonymous"
     />
+
+    <!-- Add this script tag to the head section of your HTML -->
   </head>
 
   <body>
@@ -30,7 +32,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" aria-current="page" href="/?q=all&pageNo=1">Home</a>
+              <a class="nav-link active" href="/?q=all&pageNo=1">Home</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/?q=weather&pageNo=1">Weather</a>
@@ -76,13 +78,20 @@
     </nav>
 
     <div class="container row mx-auto">
-        <div class="d-flex justify-content-center">
-            <h1><span id="queryText"></span> (<span id="queryResult"></span> Results) </h1>
-        </div>
+      <div class="d-flex justify-content-center">
+        <h1>
+          <span id="queryText"></span> (<span id="queryResult"></span> Results)
+        </h1>
+      </div>
 
       <div id="content" class="row">
         <div class="d-flex justify-content-center">
-            <img src="https://samherbert.net/svg-loaders/svg-loaders/oval.svg" style="filter:invert(1)" width="50"  alt="loading...">
+          <img
+            src="https://samherbert.net/svg-loaders/svg-loaders/oval.svg"
+            style="filter: invert(1)"
+            width="50"
+            alt="loading..."
+          />
         </div>
       </div>
 
@@ -107,13 +116,28 @@
     ></script>
     <script>
       console.log("everything's good");
+      if (window.location.search === "") {
+        window.location.href = "/?q=all&pageNo=1";
+      }
+
       let query = window.location.search
         .split("?")[1]
         .split("&")[0]
         .split("=")[1];
-      let page = parseInt(
-        window.location.search.split("?")[1].split("&")[1].split("=")[1]
-      );
+
+      let page = 1;
+      if (window.location.search) {
+        const queryParams = window.location.search.split("?")[1].split("&");
+        if (queryParams.length > 1) {
+          const pageParam = queryParams.find((param) =>
+            param.startsWith("pageNo=")
+          );
+          if (pageParam) {
+            page = parseInt(pageParam.split("=")[1]);
+          }
+        }
+      }
+
       console.log(query, page);
 
       let totalPages;
@@ -127,8 +151,8 @@
           let data = await response.json();
           console.log(data);
 
-          queryText.innerHTML=query;
-          queryResult.innerHTML=data.totalResults;
+          queryText.innerHTML = query;
+          queryResult.innerHTML = data.totalResults;
 
           totalPages = Math.ceil(data.totalResults / articlesPerPage);
 
