@@ -1,4 +1,4 @@
-# newsApp
+# News Junction
 steps: 
 1. download as zip
 2. extract folder
